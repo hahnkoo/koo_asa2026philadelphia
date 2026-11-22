@@ -1,0 +1,6 @@
+{
+ "left": [-2,-1],
+ "right": [1,2],
+ "distance_func": "spectral_transition_measure",
+ "distance_kwargs": {}
+}
