@@ -4,7 +4,7 @@ __author__ = 'Hahn Koo (hahn.koo@sjsu.edu)'
 import argparse, glob, sys, pickle
 import librosa
 import numpy as np
-import ssl_features, misc
+import ssl_features
 
 	
 def log(x, eps=1e-10):
@@ -15,6 +15,13 @@ def normalize(x, eps=1e-10):
 	mx = np.max(x) + eps
 	mn = np.min(x)
 	return (x - mn) / (mx - mn)
+
+def z_score(x, eps=1e-10):
+	x = np.array(x)
+	m = np.mean(x)
+	if len(x) == 1: s = 0.0
+	else: s = np.std(x)
+	return (x - m) / (s + eps)
 
 def voiced(x, frame_boundaries, sampling_rate, fmin=50, fmax=600, frame_shift=0.01, frame_size=0.025, z_transform=False):
 	if type(frame_boundaries) != list: frame_boundaries = list(frame_boundaries)
@@ -31,7 +38,7 @@ def voiced(x, frame_boundaries, sampling_rate, fmin=50, fmax=600, frame_shift=0.
 		voiced_ratio = np.sum(voiced_flag) / len(voiced_flag)
 		out.append(voiced_ratio)
 	out = np.array(out)
-	if z_transform: out = misc.z_score(out)
+	if z_transform: out = z_score(out)
 	return out 
 
 def rms(x, frame_boundaries, sampling_rate, frame_shift=0.01, frame_size=0.025, z_transform=False):
@@ -48,7 +55,7 @@ def rms(x, frame_boundaries, sampling_rate, frame_shift=0.01, frame_size=0.025, 
 		r = librosa.feature.rms(y=interval, frame_length=wl, hop_length=hl)
 		out.append(np.mean(r))
 	out = np.array(out)
-	if z_transform: out = misc.z_score(out)
+	if z_transform: out = z_score(out)
 	return out 
 
 def zcr(x, frame_boundaries, sampling_rate, frame_shift=0.01, frame_size=0.025, z_transform=False):
@@ -65,7 +72,7 @@ def zcr(x, frame_boundaries, sampling_rate, frame_shift=0.01, frame_size=0.025, 
 		z = librosa.feature.zero_crossing_rate(y=interval, frame_length=wl, hop_length=hl)
 		out.append(np.mean(z))
 	out = np.array(out)
-	if z_transform: out = misc.z_score(out)
+	if z_transform: out = z_score(out)
 	return out 
 
 def silence_intervals(x, frame_boundaries, kwargs={}):
